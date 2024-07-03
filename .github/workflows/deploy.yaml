@@ -1,0 +1,27 @@
+name: Continues Deployment
+on:
+  push:
+    branches:
+      - main
+jobs:
+  cd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSKEY }}
+          port: 22
+          script: |
+            cd /pab.justnear.my.id/
+            git pull origin main
+            git status
+            composer install --optimize-autoloader --no-dev
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
